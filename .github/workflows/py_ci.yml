@@ -31,7 +31,7 @@ jobs:
     
     - name: Type check with mypy
       run: |
-        mypy src tests
+        mypy .
     
     - name: Run tests
       run: |
