@@ -6,6 +6,7 @@ from parser import parse_wikipedia_page, is_wikipedia_url
 MAX_DEPTH = 2
 MAX_CONCURRENT_REQUESTS = 10
 
+
 async def crawl_wikipedia(start_url: str, output_file: str) -> None:
     all_links: Set[str] = set()
     queue = asyncio.Queue()
@@ -38,32 +39,36 @@ async def crawl_wikipedia(start_url: str, output_file: str) -> None:
     for w in workers:
         w.cancel()
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         for link in sorted(all_links):
             f.write(f"{link}\n")
 
     print(f"Crawling complete. Found {len(all_links)} unique links.")
 
+
 def validate_url(url: str) -> bool:
     parsed_url = urlparse(url)
     return bool(parsed_url.scheme and parsed_url.netloc)
 
+
 async def run_crawler(start_url: str, output_file: str) -> None:
     if not validate_url(start_url):
         raise ValueError("Invalid URL provided")
-    
+
     if not is_wikipedia_url(start_url):
         raise ValueError("The provided URL is not a valid Wikipedia article URL")
 
     await crawl_wikipedia(start_url, output_file)
 
+
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) != 3:
         print("Usage: python crawler.py <start_url> <output_file>")
         sys.exit(1)
-    
+
     start_url = sys.argv[1]
     output_file = sys.argv[2]
-    
+
     asyncio.run(run_crawler(start_url, output_file))
