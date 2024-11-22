@@ -1,43 +1,32 @@
 import asyncio
-from typing import Set
 from urllib.parse import urlparse
+import argparse
 from parser import parse_wikipedia_page, is_wikipedia_url
 
-MAX_DEPTH = 2
-MAX_CONCURRENT_REQUESTS = 10
 
+async def crawl_wikipedia(start_url: str, output_file: str, max_depth: int) -> None:
+    all_links: set[str] = set()
 
-async def crawl_wikipedia(start_url: str, output_file: str) -> None:
-    all_links: Set[str] = set()
-    queue = asyncio.Queue()
-    queue.put_nowait((start_url, 1))
+    async def crawl_page(url: str, depth: int) -> None:
+        if depth > max_depth or url in all_links:
+            return
 
-    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+        all_links.add(url)
 
-    async def worker():
-        while True:
-            url, depth = await queue.get()
-            if depth > MAX_DEPTH or url in all_links:
-                queue.task_done()
-                continue
+        if depth == max_depth:
+            return
 
-            all_links.add(url)
+        links = await asyncio.to_thread(parse_wikipedia_page, url)
 
-            if depth < MAX_DEPTH:
-                async with semaphore:
-                    links = await asyncio.to_thread(parse_wikipedia_page, url)
+        tasks = []
+        for link in links:
+            if is_wikipedia_url(link) and link not in all_links:
+                task = asyncio.create_task(crawl_page(link, depth + 1))
+                tasks.append(task)
 
-                for link in links:
-                    if is_wikipedia_url(link) and link not in all_links:
-                        queue.put_nowait((link, depth + 1))
+        await asyncio.gather(*tasks)
 
-            queue.task_done()
-
-    workers = [asyncio.create_task(worker()) for _ in range(MAX_CONCURRENT_REQUESTS)]
-    await queue.join()
-
-    for w in workers:
-        w.cancel()
+    await crawl_page(start_url, 1)
 
     with open(output_file, "w") as f:
         for link in sorted(all_links):
@@ -51,24 +40,28 @@ def validate_url(url: str) -> bool:
     return bool(parsed_url.scheme and parsed_url.netloc)
 
 
-async def run_crawler(start_url: str, output_file: str) -> None:
+async def run_crawler(start_url: str, output_file: str, max_depth: int) -> None:
     if not validate_url(start_url):
         raise ValueError("Invalid URL provided")
 
     if not is_wikipedia_url(start_url):
         raise ValueError("The provided URL is not a valid Wikipedia article URL")
 
-    await crawl_wikipedia(start_url, output_file)
+    await crawl_wikipedia(start_url, output_file, max_depth)
 
 
 if __name__ == "__main__":
-    import sys
+    parser = argparse.ArgumentParser(description="Crawl Wikipedia pages.")
+    parser.add_argument("start_url", help="The starting Wikipedia URL to crawl.")
+    parser.add_argument("output_file", help="The file to write the output links.")
+    parser.add_argument(
+        "--max_depth", type=int, default=2, help="Maximum depth to crawl (default: 2)."
+    )
 
-    if len(sys.argv) != 3:
-        print("Usage: python crawler.py <start_url> <output_file>")
-        sys.exit(1)
+    args = parser.parse_args()
 
-    start_url = sys.argv[1]
-    output_file = sys.argv[2]
+    start_url = args.start_url
+    output_file = args.output_file
+    max_depth = args.max_depth
 
-    asyncio.run(run_crawler(start_url, output_file))
+    asyncio.run(run_crawler(start_url, output_file, max_depth))
