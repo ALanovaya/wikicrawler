@@ -1,35 +1,38 @@
 import urllib.request
 from urllib.parse import urljoin, urlparse
+from urllib.error import URLError
 from html.parser import HTMLParser
-from typing import Set, List
 
 
 class WikipediaParser(HTMLParser):
     def __init__(self, base_url: str):
         super().__init__()
         self.base_url = base_url
-        self.links: Set[str] = set()
+        self.links: set[str] = set()
 
-    def handle_starttag(self, tag: str, attrs: List[tuple[str, str | None]]) -> None:
-        if tag == "a":
-            for attr, value in attrs:
-                if attr == "href":
-                    if value and value.startswith("/wiki/") and ":" not in value:
-                        full_url = urljoin(self.base_url, value)
-                        self.links.add(full_url)
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+
+        href = next((value for attr, value in attrs if attr == "href"), None)
+        if not href or not href.startswith("/wiki/") or ":" in href:
+            return
+
+        full_url = urljoin(self.base_url, href)
+        self.links.add(full_url)
 
 
-def parse_wikipedia_page(url: str) -> Set[str]:
+def parse_wikipedia_page(url: str) -> set[str]:
     try:
         with urllib.request.urlopen(url) as response:
             html = response.read().decode("utf-8")
-
-        parser = WikipediaParser(url)
-        parser.feed(html)
-        return parser.links
-    except Exception as e:
-        print(f"Error parsing {url}: {e}")
+    except URLError as e:
+        print(f"Error accessing {url}: {e}")
         return set()
+
+    parser = WikipediaParser(url)
+    parser.feed(html)
+    return parser.links
 
 
 def is_wikipedia_url(url: str) -> bool:
@@ -39,7 +42,7 @@ def is_wikipedia_url(url: str) -> bool:
     )
 
 
-def get_wikipedia_links(url: str) -> Set[str]:
+def get_wikipedia_links(url: str) -> set[str]:
     if not is_wikipedia_url(url):
         raise ValueError("The provided URL is not a valid Wikipedia article URL")
     return parse_wikipedia_page(url)
