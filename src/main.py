@@ -1,7 +1,7 @@
 import asyncio
 from urllib.parse import urlparse
 import argparse
-from parser import parse_wikipedia_page, is_wikipedia_url
+from .parser import parse_wikipedia_page, is_wikipedia_url
 
 
 async def crawl_wikipedia(start_url: str, output_file: str, max_depth: int) -> None:
