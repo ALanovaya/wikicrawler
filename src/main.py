@@ -9,7 +9,11 @@ if __name__ == "__main__":
         "--database", default="wikipedia_links.db", help="SQLite database path."
     )
     parser.add_argument(
-        "--max_depth", type=int, default=2, help="Maximum depth to crawl (default: 2)."
+        "--max_depth",
+        type=int,
+        default=2,
+        help="Maximum depth to crawl (default: 2, max: 6).",
+        choices=range(1, 7),
     )
 
     args = parser.parse_args()
