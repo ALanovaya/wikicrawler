@@ -1,7 +1,6 @@
 import asyncio
 import argparse
-from src.crawler import run_crawler
-
+from src.crawler import Crawler
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Crawl Wikipedia pages.")
@@ -19,4 +18,5 @@ if __name__ == "__main__":
     database = args.database
     max_depth = args.max_depth
 
-    asyncio.run(run_crawler(start_url, database, max_depth))
+    crawler = Crawler(start_url, database, max_depth)
+    asyncio.run(crawler.run())
