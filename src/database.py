@@ -27,6 +27,13 @@ class Database:
             """
         )
 
+        self.clear_data()
+
+    def clear_data(self) -> None:
+        """Clear all data from the database."""
+        with self.connection:
+            self.connection.execute("DELETE FROM links")
+
     def insert_link(self, url: str, depth: int) -> None:
         """Insert a link into the database."""
         cursor = self.connection.cursor()
