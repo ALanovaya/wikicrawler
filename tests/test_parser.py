@@ -98,5 +98,6 @@ class TestParserFunctions(unittest.TestCase):
         links = parse_wikipedia_page("https://en.wikipedia.org/wiki/Test")
         self.assertEqual(len(links), 0)
 
+
 if __name__ == "__main__":
     unittest.main()
