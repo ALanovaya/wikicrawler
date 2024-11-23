@@ -42,7 +42,8 @@ class Crawler:
             )
 
         finally:
-            self.db.close()
+            if self.db.connection:
+                self.db.close()
 
     def validate_url(self, url: str) -> bool:
         """Validate if the provided URL is a valid Wikipedia article URL."""
