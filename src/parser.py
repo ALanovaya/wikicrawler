@@ -11,6 +11,7 @@ class WikipediaParser(HTMLParser):
         self.links: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Handle the start tag of an HTML element."""
         if tag != "a":
             return
 
@@ -23,6 +24,7 @@ class WikipediaParser(HTMLParser):
 
 
 def parse_wikipedia_page(url: str) -> set[str]:
+    """Parse a Wikipedia page and extract links."""
     try:
         with urllib.request.urlopen(url) as response:
             html = response.read().decode("utf-8")
@@ -36,13 +38,9 @@ def parse_wikipedia_page(url: str) -> set[str]:
 
 
 def is_wikipedia_url(url: str) -> bool:
+    """Check if the provided URL is a valid Wikipedia article URL."""
     parsed_url = urlparse(url)
-    return parsed_url.netloc.endswith("wikipedia.org") and parsed_url.path.startswith(
-        "/wiki/"
+    return (
+        parsed_url.netloc.endswith("wikipedia.org")
+        and parsed_url.path.startswith("/wiki/")
     )
-
-
-def get_wikipedia_links(url: str) -> set[str]:
-    if not is_wikipedia_url(url):
-        raise ValueError("The provided URL is not a valid Wikipedia article URL")
-    return parse_wikipedia_page(url)
