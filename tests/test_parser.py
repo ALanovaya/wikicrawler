@@ -1,9 +1,9 @@
-import unittest
+from unittest import TestCase, main
 from unittest.mock import patch
 from src.parser import WikipediaParser, parse_wikipedia_page, is_wikipedia_url
 
 
-class TestWikipediaParser(unittest.TestCase):
+class TestWikipediaParser(TestCase):
     def setUp(self):
         self.base_url = "https://en.wikipedia.org/wiki/Python_(programming_language)"
         self.parser = WikipediaParser(self.base_url)
@@ -33,7 +33,7 @@ class TestWikipediaParser(unittest.TestCase):
         self.assertEqual(len(self.parser.links), 0)
 
 
-class TestParserFunctions(unittest.TestCase):
+class TestParserFunctions(TestCase):
     @patch("src.parser.urllib.request.urlopen")
     def test_parse_wikipedia_page(self, mock_urlopen):
         mock_urlopen.return_value.__enter__.return_value.read.return_value = b"""
@@ -100,4 +100,4 @@ class TestParserFunctions(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

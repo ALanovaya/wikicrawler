@@ -1,10 +1,10 @@
-import unittest
+from unittest import TestCase, main
 import sqlite3
 import os
 from src.database import create_connection, initialize_database, insert_link, get_links
 
 
-class TestDatabase(unittest.TestCase):
+class TestDatabase(TestCase):
     def setUp(self):
         self.test_db = "test_database.db"
         self.conn = create_connection(self.test_db)
@@ -82,4 +82,4 @@ class TestDatabase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
