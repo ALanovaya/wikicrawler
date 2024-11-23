@@ -1,11 +1,6 @@
 import unittest
 from unittest.mock import patch
-from src.parser import (
-    WikipediaParser,
-    parse_wikipedia_page,
-    is_wikipedia_url,
-    get_wikipedia_links,
-)
+from src.parser import WikipediaParser, parse_wikipedia_page, is_wikipedia_url
 
 
 class TestWikipediaParser(unittest.TestCase):
@@ -46,21 +41,6 @@ class TestParserFunctions(unittest.TestCase):
         self.assertTrue(is_wikipedia_url("https://en.wikipedia.org/wiki/Python"))
         self.assertFalse(is_wikipedia_url("https://www.google.com"))
         self.assertFalse(is_wikipedia_url("https://en.wikipedia.org/w/index.php"))
-
-    @patch("src.parser.parse_wikipedia_page")
-    def test_get_wikipedia_links(self, mock_parse):
-        mock_parse.return_value = {
-            "https://en.wikipedia.org/wiki/Python",
-            "https://en.wikipedia.org/wiki/Programming",
-        }
-        links = get_wikipedia_links("https://en.wikipedia.org/wiki/Test")
-        self.assertEqual(len(links), 2)
-        self.assertIn("https://en.wikipedia.org/wiki/Python", links)
-        self.assertIn("https://en.wikipedia.org/wiki/Programming", links)
-
-    def test_get_wikipedia_links_invalid_url(self):
-        with self.assertRaises(ValueError):
-            get_wikipedia_links("https://www.google.com")
 
 
 if __name__ == "__main__":

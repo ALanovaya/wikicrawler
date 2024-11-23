@@ -1,12 +1,14 @@
 import asyncio
 import argparse
-from crawler import run_crawler
+from src.crawler import run_crawler
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Crawl Wikipedia pages.")
     parser.add_argument("start_url", help="The starting Wikipedia URL to crawl.")
-    parser.add_argument("output_file", help="The file to write the output links.")
+    parser.add_argument(
+        "--database", default="wikipedia_links.db", help="SQLite database path."
+    )
     parser.add_argument(
         "--max_depth", type=int, default=2, help="Maximum depth to crawl (default: 2)."
     )
@@ -14,7 +16,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_url = args.start_url
-    output_file = args.output_file
+    database = args.database
     max_depth = args.max_depth
 
-    asyncio.run(run_crawler(start_url, output_file, max_depth))
+    asyncio.run(run_crawler(start_url, database, max_depth))
