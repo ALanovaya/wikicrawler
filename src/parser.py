@@ -40,7 +40,6 @@ def parse_wikipedia_page(url: str) -> set[str]:
 def is_wikipedia_url(url: str) -> bool:
     """Check if the provided URL is a valid Wikipedia article URL."""
     parsed_url = urlparse(url)
-    return (
-        parsed_url.netloc.endswith("wikipedia.org")
-        and parsed_url.path.startswith("/wiki/")
+    return parsed_url.netloc.endswith("wikipedia.org") and parsed_url.path.startswith(
+        "/wiki/"
     )
